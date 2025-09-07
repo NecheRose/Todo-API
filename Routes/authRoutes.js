@@ -1,31 +1,26 @@
 import { Router } from "express";
-import { registerUser, verifyEmail, resendVerificationLink, loginUser, logoutUser, passwordResetRequest, passwordReset, refreshAccessToken} from "../controllers/users/barrel.js";
-import { rateLimiter } from "../middlewares/rateLimiter.js";
+import { registerUser, verifyEmail, resendVerificationLink, loginUser, logoutUser, passwordResetRequest, passwordReset, refreshAccessToken} from "../controllers/barrel.js";
+import { userRateLimiter } from "../middlewares/rateLimiter.js";
 
 const authRouter = Router();
 
 
 authRouter
       // Authentication
-      .post('/register', registerUser)
-      .post('/login', rateLimiter, loginUser)
+      .post('/register', userRateLimiter, registerUser)
+      .post('/login', userRateLimiter, loginUser)
       .post('/logout', logoutUser)
       .post('/refresh-token', refreshAccessToken) 
 
       // Email Verification
       .get('/verify-email', verifyEmail) 
-      .post('/resend-verification', resendVerificationLink)
+      .post('/resend-verification', userRateLimiter, resendVerificationLink)
 
       // Password Reset 
-      .post('/forgot-password', passwordResetRequest)
-      .post('/reset-password', rateLimiter, passwordReset)
-
-      // register/login with Goggle (optional)
-      .get('/google', registerWithGoggle)
-      .get('/google/callback', verifyAccount)
+      .post('/forgot-password', userRateLimiter, passwordResetRequest)
+      .post('/reset-password', passwordReset)
 
 
-      
 
 
 export default authRouter;

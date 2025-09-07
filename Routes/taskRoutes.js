@@ -1,23 +1,21 @@
 import { Router } from "express";
-import { createTasks, bulkCompleteTasks, updateTasks, deleteTasks, getTasks, getOneTask, restoreTasks, getTasksByCategory, getTasksByStatus} from "../controllers/barrel.js";
+import { createTasks, updateTasks, deleteTasks, getTasks, getOneTask, restoreTasks, getTasksByStatus, toggleTaskStatus } from "../controllers/barrel.js";
+import { authMiddleware } from "../middlewares/authMiddleware.js"
 
 const taskRouter = Router();
 
 
-authRouter
-      // Authentication
-      .post('/create', createTasks)
-      .get('/', getTasks)
-      .post('/bulk/complete', bulkCompleteTasks)
-      .get('/:id', getOneTask)
-      .patch('/:id', updateTasks)
-      .delete('/:id', deleteTasks)
-      .delete('/:id/restore', restoreTasks)
-      .get('/category/:catId', getTasksByCategory) // Get task by category
-      .get('/status/:statusId', getTasksByStatus)  // Get task by status (Complete, Incomplete)
+taskRouter
+      .post('/create', authMiddleware, createTasks)
+      .get('/', authMiddleware, getTasks)
+      .post('/:id/status', authMiddleware, toggleTaskStatus)
+      .get('/:id', authMiddleware, getOneTask)
+      .patch('/:id', authMiddleware, updateTasks)
+      .delete('/:id', authMiddleware, deleteTasks)
+      .post('/:id/restore', authMiddleware, restoreTasks)
+      .get('/', authMiddleware, getTasksByStatus)  // Get task by status (Complete, Incomplete)
       
 
       
       
 export default taskRouter;
-      

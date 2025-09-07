@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken"
 import User from "../models/userSchema.js"
-import {client} from "../lib/redis.js";
 import {generateAccessToken} from "../utils/tokenManagement.js";
 
 
@@ -38,12 +37,6 @@ export const authMiddleware = async (req, res, next) => {
           return res.status(403).json({ message: "Invalid or expired refresh token" });
         }
 
-        // Check Redis for valid refresh token
-        const storedToken = await client.get(`refresh_token:${refreshDecoded.userId}`);
-        if (!storedToken || storedToken !== refreshToken) {
-          return res.status(401).json({ message: "Invalid refresh token" });
-        }
-
         // Issue new access token
         const newAccessToken = generateAccessToken(refreshDecoded.userId);
 
@@ -70,6 +63,6 @@ export const authMiddleware = async (req, res, next) => {
     next();
   } catch (err) {
     console.error("AuthMiddleware Error:", err);
-    return res.status(500).json({ message: "Authentication error", err: err.message });
+    return res.status(500).json({ message: "Authentication error", error: err.message });
   }
 };

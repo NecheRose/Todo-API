@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import { client } from "../lib/redis";
 
 
 // Generate access token and refresh token
@@ -16,7 +15,7 @@ export const setCookies = (res, accessToken, refreshToken) => {
   res.cookie("accessToken", accessToken, {
     httpOnly: true,   //prevent Cross-site scripting attack attacks(XSS)
     secure: process.env.COOKIE_SECURE === "true",
-    sameSite: process.env.COOKIE_SAMESITE === "none", 
+    sameSite: process.env.COOKIE_SAMESITE === "strict", 
     path: "/",       // ensures cookie is removed from the root path
     maxAge: 30 * 60 * 1000  // 30 minutes
   });
@@ -24,20 +23,26 @@ export const setCookies = (res, accessToken, refreshToken) => {
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.COOKIE_SECURE === "true",
-    sameSite: process.env.COOKIE_SAMESITE === "none",
+    sameSite: process.env.COOKIE_SAMESITE === "strict",
     path: "/", 
     maxAge:  7 * 24 * 60 * 60 * 1000  // 7 days 
   });
 };
 
-export const storeRefreshToken = async (userId, refreshToken) => {
-  await client.set(
-    `refresh_token:${userId}`,
-    refreshToken,
-    { EX: process.env.CLOUD_REDIS_REFRESH_TOKEN_EXPIRY } 
-  );
-};
+// Clear cookies
+export const clearCookie = (res) => {
+  res.clearCookie("accessToken", { 
+    httpOnly: true, 
+    secure: process.env.COOKIE_SECURE === "true",
+    sameSite: process.env.COOKIE_SAMESITE || "strict",
+  });
 
+  res.clearCookie("refreshToken", { 
+    httpOnly: true, 
+    secure: process.env.COOKIE_SECURE === "true",
+    sameSite: process.env.COOKIE_SAMESITE || "strict",
+  });
+};
 
 
 
